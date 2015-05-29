@@ -1,0 +1,49 @@
+####################################
+#+================================+#
+#|+==============================+|#
+#||                              ||#
+#||       TablistPrefixer        ||#
+#||             by               ||#
+#||       GrimReaper52498        ||#
+#||                              ||#
+#||   Request by SkilledKevin25  ||#
+#|+==============================+|#
+#+================================+#
+####################################
+
+#THE BELOW TWO OPTIONS ARE A WIP AND HAVE NO USE YET.
+#Setting this to true will enable the plugin to get your prefix by
+#using your permissions plugin (e.g GroupManager, PEX)
+#NOTE: Before setting this to true, ensure rank prefixes
+#are 16 characters or less(this includes color codes),
+#and also ensure your server is running Vault.
+
+GetPermPrefixes: false
+
+#Set this to true to replace brackets in the prefixes, works with [], <>, ().
+ReplaceBrackets: false
+
+#You dont need to change these if the above 'GetPermPrefixes' is true
+
+Owner: '&4Owner '
+CoOwner: '&cCoOwner '
+HeadAdmin: '&cHeadAdmin '
+Admin: '&cAdmin '
+HeadMod: '&aHeadMod '
+Mod: '&3Mod '
+Helper: '&bHelper '
+Builder: '&dBuilder '
+Developer: '&aDev '
+
+Default: '&7Member '
+
+Donor1: 'Coal '
+Donor2: 'Iron '
+Donor3: 'Gold '
+Donor4: 'Diamond '
+Donor5: 'Emerald '
+Donor6: 'VIP '
+Donor7: 'VIP+ '
+Donor8: 'MVP '
+Donor9: 'MVP+'
+Donor10: 'Sponsor '
