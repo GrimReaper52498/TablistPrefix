@@ -47,3 +47,29 @@ Donor7: 'VIP+ '
 Donor8: 'MVP '
 Donor9: 'MVP+'
 Donor10: 'Sponsor '
+
+#Set this to true to add suffixes to the groups as well
+Use-Suffixes: false
+
+Owner-Suffix: '&4Owner '
+CoOwner-Suffix: '&cCoOwner '
+HeadAdmin-Suffix: '&cHeadAdmin '
+Admin-Suffix: '&cAdmin '
+HeadMod-Suffix: '&aHeadMod '
+Mod-Suffix: '&3Mod '
+Helper-Suffix: '&bHelper '
+Builder-Suffix: '&dBuilder '
+Developer-Suffix: '&aDev '
+
+Default-Suffix: '&7Member '
+
+Donor1-Suffix: 'Coal '
+Donor2-Suffix: 'Iron '
+Donor3-Suffix: 'Gold '
+Donor4-Suffix: 'Diamond '
+Donor5-Suffix: 'Emerald '
+Donor6-Suffix: 'VIP '
+Donor7-Suffix: 'VIP+ '
+Donor8-Suffix: 'MVP '
+Donor9-Suffix: 'MVP+'
+Donor10-Suffix: 'Sponsor '

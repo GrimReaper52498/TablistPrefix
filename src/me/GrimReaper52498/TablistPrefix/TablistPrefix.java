@@ -70,7 +70,7 @@ public class TablistPrefix extends JavaPlugin implements Listener {
         }
 
         registerTeams();
-        setPrefixes();
+        setPrefixesAndSuffixes();
 
         //Start the task to refresh the prefixes every 300 seconds
         Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new BukkitRunnable() {
@@ -120,7 +120,7 @@ public class TablistPrefix extends JavaPlugin implements Listener {
         getLogger().log(Level.INFO, "Teams Registered.");
     }
 
-    public void setPrefixes() {
+    public void setPrefixesAndSuffixes() {
         //Grab the prefixes from the config and set them.
         owner.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Owner")));
         coowner.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("CoOwner")));
@@ -143,8 +143,33 @@ public class TablistPrefix extends JavaPlugin implements Listener {
         donor9.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor9")));
         donor10.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor10")));
 
+        //Same as above but for suffixes
+        if(getConfig().getBoolean("Use-Suffixes")){
+            owner.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Owner-Suffix")));
+            coowner.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("CoOwner-Suffix")));
+            hadmin.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("HeadAdmin-Suffix")));
+            admin.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Admin-Suffix")));
+            hmod.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("HeadMod-Suffix")));
+            mod.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Mod-Suffix")));
+            helper.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Helper-Suffix")));
+            builder.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Builder-Suffix")));
+            developer.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Developer-Suffix")));
+            def.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Default-Suffix")));
+            donor1.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor1-Suffix")));
+            donor2.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor2-Suffix")));
+            donor3.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor3-Suffix")));
+            donor4.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor4-Suffix")));
+            donor5.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor5-Suffix")));
+            donor6.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor6-Suffix")));
+            donor7.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor7-Suffix")));
+            donor8.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor8-Suffix")));
+            donor9.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor9-Suffix")));
+            donor10.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor10-Suffix")));
 
-        getLogger().log(Level.INFO, "Prefixes Set.");
+        }
+
+
+        getLogger().log(Level.INFO, "Prefixes & Suffixes Set.");
     }
 
     //No use as of right now. Still a WIP.
