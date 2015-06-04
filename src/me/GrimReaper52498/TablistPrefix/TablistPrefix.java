@@ -1,5 +1,6 @@
 package me.GrimReaper52498.TablistPrefix;
 
+import me.GrimReaper52498.TablistPrefix.command.Command;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -72,6 +73,8 @@ public class TablistPrefix extends JavaPlugin implements Listener {
             vault = false;
         }
 
+        getCommand("tabprefix").setExecutor(new Command(this));
+
         registerTeams();
         setPrefixesAndSuffixes();
 
@@ -90,8 +93,7 @@ public class TablistPrefix extends JavaPlugin implements Listener {
         saveDefaultConfig();
         Bukkit.getScheduler().cancelAllTasks();
     }
-
-    private boolean setupPermissions() {
+    public boolean setupPermissions() {
         RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
         if (permissionProvider != null) {
             permission = permissionProvider.getProvider();
@@ -99,14 +101,13 @@ public class TablistPrefix extends JavaPlugin implements Listener {
         return (permission != null);
     }
 
-    private boolean setupChat() {
+    public boolean setupChat() {
         RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
         if (chatProvider != null) {
             chat = chatProvider.getProvider();
         }
         return (chat != null);
     }
-
     public void registerTeams() {
         //Register team if not already registered
         owner = sb.getTeam("OWNER") == null ? sb.registerNewTeam("OWNER") : sb.getTeam("OWNER");
@@ -196,69 +197,7 @@ public class TablistPrefix extends JavaPlugin implements Listener {
 
         if (vault && getConfig().getBoolean("GetPermPrefixes")) {
             for (Player p : Bukkit.getOnlinePlayers()) {
-                Team playerPrefix = sb.getTeam(p.getName()) == null ? sb.registerNewTeam(p.getName()) : sb.getTeam(p.getName());
-                if (chat.getPlayerPrefix(p).length() <= 16) {
-                    if (getConfig().getBoolean("ReplaceBrackets")) {
-                        String prefix = chat.getPlayerPrefix(p);
-                        String prefix1 = prefix.replace("<", "").replace(">", "");
-                        String prefix2 = prefix1.replace("[", "").replace("]", "");
-                        String prefix3 = prefix2.replace("(", "").replace(")", "");
-                        String prefix4 = prefix3.replace("{", "").replace("}", "");
-                        String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix4);
-                        playerPrefix.setPrefix(finalPrefix);
-                        if (getConfig().getBoolean("Use-Suffixes")) {
-                            if (chat.getPlayerSuffix(p).length() <= 16) {
-                                String suffix = chat.getPlayerSuffix(p);
-                                String suffix1 = suffix.replace("<", "").replace(">", "");
-                                String suffix2 = suffix1.replace("[", "").replace("]", "");
-                                String suffix3 = suffix2.replace("(", "").replace(")", "");
-                                String suffix4 = suffix3.replace("{", "").replace("}", "");
-                                String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix4);
-                                playerPrefix.setSuffix(finalSuffix);
-                            }
-                        }
-                        playerPrefix.addPlayer(p);
-                    } else {
-                        String prefix = chat.getPlayerPrefix(p);
-                        String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix);
-                        playerPrefix.setPrefix(finalPrefix);
-                        if (getConfig().getBoolean("Use-Suffixes")) {
-                            if (chat.getPlayerSuffix(p).length() <= 16) {
-                                String suffix = chat.getPlayerSuffix(p);
-                                String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix);
-                                playerPrefix.setSuffix(finalSuffix);
-                            }
-                        }
-                        playerPrefix.addPlayer(p);
-                    }
-                } else {
-                    if (getConfig().getBoolean("ReplaceBrackets")) {
-                        String prefix = chat.getPlayerPrefix(p);
-                        String prefix1 = prefix.replace("<", "").replace(">", "");
-                        String prefix2 = prefix1.replace("[", "").replace("]", "");
-                        String prefix3 = prefix2.replace("(", "").replace(")", "");
-                        String prefix4 = prefix3.replace("{", "").replace("}", "");
-                        String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix4);
-                        if (finalPrefix.length() <= 16) {
-                            playerPrefix.setPrefix(finalPrefix);
-                        }
-                        if (getConfig().getBoolean("Use-Suffixes")) {
-
-                            String suffix = chat.getPlayerSuffix(p);
-                            String suffix1 = suffix.replace("<", "").replace(">", "");
-                            String suffix2 = suffix1.replace("[", "").replace("]", "");
-                            String suffix3 = suffix2.replace("(", "").replace(")", "");
-                            String suffix4 = suffix3.replace("{", "").replace("}", "");
-                            String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix4);
-                            if (chat.getPlayerSuffix(p).length() <= 16) {
-                                playerPrefix.setSuffix(finalSuffix);
-                            }
-                        }
-                        playerPrefix.addPlayer(p);
-                    } else {
-                      Bukkit.getConsoleSender().sendMessage("[Tab Prefix] Looks like your defined prefixes aren't 16 characters or less!");
-                    }
-                }
+                permPrefixes(p);
             }
         } else {
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -303,6 +242,72 @@ public class TablistPrefix extends JavaPlugin implements Listener {
                 } else {
                     def.addPlayer(p);
                 }
+            }
+        }
+    }
+
+    public void permPrefixes(Player p) {
+        Team playerPrefix = sb.getTeam(p.getName()) == null ? sb.registerNewTeam(p.getName()) : sb.getTeam(p.getName());
+        if (chat.getPlayerPrefix(p).length() <= 16) {
+            if (getConfig().getBoolean("ReplaceBrackets")) {
+                String prefix = chat.getPlayerPrefix(p);
+                String prefix1 = prefix.replace("<", "").replace(">", "");
+                String prefix2 = prefix1.replace("[", "").replace("]", "");
+                String prefix3 = prefix2.replace("(", "").replace(")", "");
+                String prefix4 = prefix3.replace("{", "").replace("}", "");
+                String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix4);
+                playerPrefix.setPrefix(finalPrefix);
+                if (getConfig().getBoolean("Use-Suffixes")) {
+                    if (chat.getPlayerSuffix(p).length() <= 16) {
+                        String suffix = chat.getPlayerSuffix(p);
+                        String suffix1 = suffix.replace("<", "").replace(">", "");
+                        String suffix2 = suffix1.replace("[", "").replace("]", "");
+                        String suffix3 = suffix2.replace("(", "").replace(")", "");
+                        String suffix4 = suffix3.replace("{", "").replace("}", "");
+                        String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix4);
+                        playerPrefix.setSuffix(finalSuffix);
+                    }
+                }
+                playerPrefix.addPlayer(p);
+            } else {
+                String prefix = chat.getPlayerPrefix(p);
+                String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix);
+                playerPrefix.setPrefix(finalPrefix);
+                if (getConfig().getBoolean("Use-Suffixes")) {
+                    if (chat.getPlayerSuffix(p).length() <= 16) {
+                        String suffix = chat.getPlayerSuffix(p);
+                        String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix);
+                        playerPrefix.setSuffix(finalSuffix);
+                    }
+                }
+                playerPrefix.addPlayer(p);
+            }
+        } else {
+            if (getConfig().getBoolean("ReplaceBrackets")) {
+                String prefix = chat.getPlayerPrefix(p);
+                String prefix1 = prefix.replace("<", "").replace(">", "");
+                String prefix2 = prefix1.replace("[", "").replace("]", "");
+                String prefix3 = prefix2.replace("(", "").replace(")", "");
+                String prefix4 = prefix3.replace("{", "").replace("}", "");
+                String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix4);
+                if (finalPrefix.length() <= 16) {
+                    playerPrefix.setPrefix(finalPrefix);
+                }
+                if (getConfig().getBoolean("Use-Suffixes")) {
+
+                    String suffix = chat.getPlayerSuffix(p);
+                    String suffix1 = suffix.replace("<", "").replace(">", "");
+                    String suffix2 = suffix1.replace("[", "").replace("]", "");
+                    String suffix3 = suffix2.replace("(", "").replace(")", "");
+                    String suffix4 = suffix3.replace("{", "").replace("}", "");
+                    String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix4);
+                    if (chat.getPlayerSuffix(p).length() <= 16) {
+                        playerPrefix.setSuffix(finalSuffix);
+                    }
+                }
+                playerPrefix.addPlayer(p);
+            } else {
+                Bukkit.getConsoleSender().sendMessage("[Tab Prefix] Looks like your defined prefixes aren't 16 characters or less!");
             }
         }
     }
