@@ -1,6 +1,7 @@
 package me.GrimReaper52498.TablistPrefix;
 
 import net.md_5.bungee.api.ChatColor;
+import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -47,6 +48,7 @@ public class TablistPrefix extends JavaPlugin implements Listener {
 
 
     private Permission permission = null;
+    private Chat chat = null;
 
     public void onEnable() {
 
@@ -64,6 +66,7 @@ public class TablistPrefix extends JavaPlugin implements Listener {
             getLogger().log(Level.INFO, "Vault found!.");
             vault = true;
             setupPermissions();
+            setupChat();
         } else {
             getLogger().log(Level.INFO, "Vault not found.");
             vault = false;
@@ -76,7 +79,9 @@ public class TablistPrefix extends JavaPlugin implements Listener {
         Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new BukkitRunnable() {
             @Override
             public void run() {
-                refreshPrefix();
+                if (!vault) {
+                    refreshPrefix();
+                }
             }
         }, 0, 300 * 20);
     }
@@ -92,6 +97,14 @@ public class TablistPrefix extends JavaPlugin implements Listener {
             permission = permissionProvider.getProvider();
         }
         return (permission != null);
+    }
+
+    private boolean setupChat() {
+        RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
+        if (chatProvider != null) {
+            chat = chatProvider.getProvider();
+        }
+        return (chat != null);
     }
 
     public void registerTeams() {
@@ -144,7 +157,7 @@ public class TablistPrefix extends JavaPlugin implements Listener {
         donor10.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor10")));
 
         //Same as above but for suffixes
-        if(getConfig().getBoolean("Use-Suffixes")){
+        if (getConfig().getBoolean("Use-Suffixes")) {
             owner.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Owner-Suffix")));
             coowner.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("CoOwner-Suffix")));
             hadmin.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("HeadAdmin-Suffix")));
@@ -172,65 +185,124 @@ public class TablistPrefix extends JavaPlugin implements Listener {
         getLogger().log(Level.INFO, "Prefixes & Suffixes Set.");
     }
 
-    //No use as of right now. Still a WIP.
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        Player pl = e.getPlayer();
-        if (!(vault) || !(getConfig().getBoolean("GetPermPrefixes"))) {
-            refreshPrefix();
-        } else {
-            int online = Bukkit.getOnlinePlayers().size();
-
-            for (int i = 0; i < online; i++) {
-
-            }
-        }
-        pl.setScoreboard(sb);
+        refreshPrefix();
+        e.getPlayer().setScoreboard(sb);
     }
 
     public void refreshPrefix() {
         //Loop through all online players and set them to the right group
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (p.hasPermission("rank.owner")) {
-                owner.addPlayer(p);
-            } else if (p.hasPermission("rank.coowner")) {
-                coowner.addPlayer(p);
-            } else if (p.hasPermission("rank.hadmin")) {
-                hadmin.addPlayer(p);
-            } else if (p.hasPermission("rank.admin")) {
-                admin.addPlayer(p);
-            } else if (p.hasPermission("rank.hmod")) {
-                hmod.addPlayer(p);
-            } else if (p.hasPermission("rank.mod")) {
-                mod.addPlayer(p);
-            } else if (p.hasPermission("rank.helper")) {
-                helper.addPlayer(p);
-            } else if (p.hasPermission("rank.builder")) {
-                builder.addPlayer(p);
-            } else if (p.hasPermission("rank.developer")) {
-                developer.addPlayer(p);
-            } else if (p.hasPermission("rank.donor1")) {
-                donor1.addPlayer(p);
-            } else if (p.hasPermission("rank.donor2")) {
-                donor2.addPlayer(p);
-            } else if (p.hasPermission("rank.donor3")) {
-                donor3.addPlayer(p);
-            } else if (p.hasPermission("rank.donor4")) {
-                donor4.addPlayer(p);
-            } else if (p.hasPermission("rank.donor5")) {
-                donor5.addPlayer(p);
-            } else if (p.hasPermission("rank.donor6")) {
-                donor6.addPlayer(p);
-            } else if (p.hasPermission("rank.donor7")) {
-                donor7.addPlayer(p);
-            } else if (p.hasPermission("rank.donor8")) {
-                donor8.addPlayer(p);
-            } else if (p.hasPermission("rank.donor9")) {
-                donor9.addPlayer(p);
-            } else if (p.hasPermission("rank.donor10")) {
-                donor10.addPlayer(p);
-            } else {
-                def.addPlayer(p);
+
+        if (vault && getConfig().getBoolean("GetPermPrefixes")) {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                Team playerPrefix = sb.getTeam(p.getName()) == null ? sb.registerNewTeam(p.getName()) : sb.getTeam(p.getName());
+                if (chat.getPlayerPrefix(p).length() <= 16) {
+                    if (getConfig().getBoolean("ReplaceBrackets")) {
+                        String prefix = chat.getPlayerPrefix(p);
+                        String prefix1 = prefix.replace("<", "").replace(">", "");
+                        String prefix2 = prefix1.replace("[", "").replace("]", "");
+                        String prefix3 = prefix2.replace("(", "").replace(")", "");
+                        String prefix4 = prefix3.replace("{", "").replace("}", "");
+                        String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix4);
+                        playerPrefix.setPrefix(finalPrefix);
+                        if (getConfig().getBoolean("Use-Suffixes")) {
+                            if (chat.getPlayerSuffix(p).length() <= 16) {
+                                String suffix = chat.getPlayerSuffix(p);
+                                String suffix1 = suffix.replace("<", "").replace(">", "");
+                                String suffix2 = suffix1.replace("[", "").replace("]", "");
+                                String suffix3 = suffix2.replace("(", "").replace(")", "");
+                                String suffix4 = suffix3.replace("{", "").replace("}", "");
+                                String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix4);
+                                playerPrefix.setSuffix(finalSuffix);
+                            }
+                        }
+                        playerPrefix.addPlayer(p);
+                    } else {
+                        String prefix = chat.getPlayerPrefix(p);
+                        String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix);
+                        playerPrefix.setPrefix(finalPrefix);
+                        if (getConfig().getBoolean("Use-Suffixes")) {
+                            if (chat.getPlayerSuffix(p).length() <= 16) {
+                                String suffix = chat.getPlayerSuffix(p);
+                                String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix);
+                                playerPrefix.setSuffix(finalSuffix);
+                            }
+                        }
+                        playerPrefix.addPlayer(p);
+                    }
+                } else {
+                    if (getConfig().getBoolean("ReplaceBrackets")) {
+                        String prefix = chat.getPlayerPrefix(p);
+                        String prefix1 = prefix.replace("<", "").replace(">", "");
+                        String prefix2 = prefix1.replace("[", "").replace("]", "");
+                        String prefix3 = prefix2.replace("(", "").replace(")", "");
+                        String prefix4 = prefix3.replace("{", "").replace("}", "");
+                        String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix4);
+                        if (finalPrefix.length() <= 16) {
+                            playerPrefix.setPrefix(finalPrefix);
+                        }
+                        if (getConfig().getBoolean("Use-Suffixes")) {
+
+                            String suffix = chat.getPlayerSuffix(p);
+                            String suffix1 = suffix.replace("<", "").replace(">", "");
+                            String suffix2 = suffix1.replace("[", "").replace("]", "");
+                            String suffix3 = suffix2.replace("(", "").replace(")", "");
+                            String suffix4 = suffix3.replace("{", "").replace("}", "");
+                            String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix4);
+                            if (chat.getPlayerSuffix(p).length() <= 16) {
+                                playerPrefix.setSuffix(finalSuffix);
+                            }
+                        }
+                        playerPrefix.addPlayer(p);
+                    } else {
+                      Bukkit.getConsoleSender().sendMessage("[Tab Prefix] Looks like your defined prefixes aren't 16 characters or less!");
+                    }
+                }
+            }
+        } else {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.hasPermission("rank.owner")) {
+                    owner.addPlayer(p);
+                } else if (p.hasPermission("rank.coowner")) {
+                    coowner.addPlayer(p);
+                } else if (p.hasPermission("rank.hadmin")) {
+                    hadmin.addPlayer(p);
+                } else if (p.hasPermission("rank.admin")) {
+                    admin.addPlayer(p);
+                } else if (p.hasPermission("rank.hmod")) {
+                    hmod.addPlayer(p);
+                } else if (p.hasPermission("rank.mod")) {
+                    mod.addPlayer(p);
+                } else if (p.hasPermission("rank.helper")) {
+                    helper.addPlayer(p);
+                } else if (p.hasPermission("rank.builder")) {
+                    builder.addPlayer(p);
+                } else if (p.hasPermission("rank.developer")) {
+                    developer.addPlayer(p);
+                } else if (p.hasPermission("rank.donor1")) {
+                    donor1.addPlayer(p);
+                } else if (p.hasPermission("rank.donor2")) {
+                    donor2.addPlayer(p);
+                } else if (p.hasPermission("rank.donor3")) {
+                    donor3.addPlayer(p);
+                } else if (p.hasPermission("rank.donor4")) {
+                    donor4.addPlayer(p);
+                } else if (p.hasPermission("rank.donor5")) {
+                    donor5.addPlayer(p);
+                } else if (p.hasPermission("rank.donor6")) {
+                    donor6.addPlayer(p);
+                } else if (p.hasPermission("rank.donor7")) {
+                    donor7.addPlayer(p);
+                } else if (p.hasPermission("rank.donor8")) {
+                    donor8.addPlayer(p);
+                } else if (p.hasPermission("rank.donor9")) {
+                    donor9.addPlayer(p);
+                } else if (p.hasPermission("rank.donor10")) {
+                    donor10.addPlayer(p);
+                } else {
+                    def.addPlayer(p);
+                }
             }
         }
     }

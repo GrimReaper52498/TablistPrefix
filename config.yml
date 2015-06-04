@@ -11,7 +11,7 @@
 #+================================+#
 ####################################
 
-#THE BELOW TWO OPTIONS ARE A WIP AND HAVE NO USE YET.
+#THE BELOW TWO OPTIONS ARE IN TESTING AND MAY NOT WORK APPROPRIATELY
 #Setting this to true will enable the plugin to get your prefix by
 #using your permissions plugin (e.g GroupManager, PEX)
 #NOTE: Before setting this to true, ensure rank prefixes
@@ -20,7 +20,7 @@
 
 GetPermPrefixes: false
 
-#Set this to true to replace brackets in the prefixes, works with [], <>, ().
+#Set this to true to replace brackets in the prefixes, works with [], <>, () and {}.
 ReplaceBrackets: false
 
 #You dont need to change these if the above 'GetPermPrefixes' is true
