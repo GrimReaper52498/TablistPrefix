@@ -6,6 +6,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 
+import java.util.regex.Pattern;
+
 /**
  * Created by GrimReaper52498 on 6/4/2015.
  */
@@ -14,9 +16,11 @@ public class Prefix
 
     private TablistPrefix pl;
 
-    public Prefix(TablistPrefix pl){
+    public Prefix(TablistPrefix pl)
+    {
 	this.pl = pl;
     }
+
     public void refreshPrefix()
     {
 	//Loop through all online players and set them to the right group
@@ -115,6 +119,7 @@ public class Prefix
 	    }
 	}
     }
+
     public void permPrefixes(Player p)
     {
 	Team playerPrefix = pl.sb.getTeam(p.getName()) == null ? pl.sb.registerNewTeam(p.getName()) : pl.sb.getTeam(p.getName());
@@ -133,6 +138,12 @@ public class Prefix
 			String finalSuffix = ChatColor.translateAlternateColorCodes('&', replaceBrackets(suffix));
 			playerPrefix.setSuffix(finalSuffix);
 		    }
+		    else
+		    {
+			String suffix = pl.chat.getPlayerSuffix(p);
+			String finalSuffix = ChatColor.translateAlternateColorCodes('&', cutString(replaceBrackets(suffix)));
+			playerPrefix.setSuffix(finalSuffix);
+		    }
 		}
 		playerPrefix.addPlayer(p);
 	    }
@@ -140,13 +151,27 @@ public class Prefix
 	    {
 		String prefix = pl.chat.getPlayerPrefix(p);
 		String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix);
-		playerPrefix.setPrefix(finalPrefix);
+		if (finalPrefix.length() > 16)
+		{
+		    playerPrefix.setPrefix(finalPrefix);
+		}
+		else
+		{
+		    playerPrefix.setPrefix(cutString(finalPrefix));
+		}
+
 		if (pl.getConfig().getBoolean("Use-Suffixes"))
 		{
 		    if (pl.chat.getPlayerSuffix(p).length() <= 16)
 		    {
 			String suffix = pl.chat.getPlayerSuffix(p);
 			String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix);
+			playerPrefix.setSuffix(finalSuffix);
+		    }
+		    else
+		    {
+			String suffix = pl.chat.getPlayerSuffix(p);
+			String finalSuffix = ChatColor.translateAlternateColorCodes('&', cutString(suffix));
 			playerPrefix.setSuffix(finalSuffix);
 		    }
 		}
@@ -163,6 +188,10 @@ public class Prefix
 		{
 		    playerPrefix.setPrefix(finalPrefix);
 		}
+		else
+		{
+		    playerPrefix.setPrefix(cutString(finalPrefix));
+		}
 		if (pl.getConfig().getBoolean("Use-Suffixes"))
 		{
 
@@ -171,6 +200,10 @@ public class Prefix
 		    if (pl.chat.getPlayerSuffix(p).length() <= 16)
 		    {
 			playerPrefix.setSuffix(finalSuffix);
+		    }
+		    else
+		    {
+			playerPrefix.setSuffix(cutString(finalSuffix));
 		    }
 		}
 		playerPrefix.addPlayer(p);
@@ -182,12 +215,51 @@ public class Prefix
 	}
     }
 
-    public String replaceBrackets(String toReplace){
+    public String replaceBrackets(String toReplace)
+    {
 	String prefix1 = toReplace.replace("<", "").replace(">", "");
 	String prefix2 = prefix1.replace("[", "").replace("]", "");
 	String prefix3 = prefix2.replace("(", "").replace(")", "");
 	String prefix4 = prefix3.replace("{", "").replace("}", "");
 	return ChatColor.translateAlternateColorCodes('&', prefix4);
+    }
+
+    public String getFirstLetter(String string)
+    {
+	final Pattern pat = Pattern.compile("^[abcdefghijklmnopqrstuvwxyz]");
+	String toReturn = "";
+
+	if (pat.matcher(string).find())
+	{
+	    toReturn = String.valueOf(string.charAt(0));
+	}
+	else if (string.charAt(0) == '[')
+	{
+	    toReturn = "[" + String.valueOf(string.charAt(1)).toUpperCase() + "]";
+	}
+	else if (string.charAt(0) == '<')
+	{
+	    toReturn = "<" + String.valueOf(string.charAt(1)).toUpperCase() + ">";
+	}
+	else if (string.charAt(0) == '(')
+	{
+	    toReturn = "(" + String.valueOf(string.charAt(1)).toUpperCase() + ")";
+	}
+	else if (string.charAt(0) == '{')
+	{
+	    toReturn = "{" + String.valueOf(string.charAt(1)).toUpperCase() + "}";
+	}
+
+	return toReturn;
+    }
+
+    public String cutString(String string)
+    {
+	if (string.length() > 16)
+	{
+	    string = string.substring(0, 15);
+	}
+	return string;
     }
 
 }
