@@ -1,15 +1,14 @@
 package me.GrimReaper52498.TablistPrefix;
 
 import me.GrimReaper52498.TablistPrefix.command.Command;
+import me.GrimReaper52498.TablistPrefix.events.OnJoin;
+import me.GrimReaper52498.TablistPrefix.hooks.Vault;
+import me.GrimReaper52498.TablistPrefix.teams.Prefix;
+import me.GrimReaper52498.TablistPrefix.teams.Teams;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Objective;
@@ -21,294 +20,98 @@ import java.util.logging.Level;
 /**
  * Created by GrimReaper52498 on 5/25/2015.
  */
-public class TablistPrefix extends JavaPlugin implements Listener {
-    private Scoreboard sb;
-    private Objective obj;
-    private boolean vault;
-    private Team prefix;
-    private Team owner;
-    private Team coowner;
-    private Team hadmin;
-    private Team admin;
-    private Team hmod;
-    private Team mod;
-    private Team helper;
-    private Team builder;
-    private Team developer;
-    private Team def;
-    private Team donor1;
-    private Team donor2;
-    private Team donor3;
-    private Team donor4;
-    private Team donor5;
-    private Team donor6;
-    private Team donor7;
-    private Team donor8;
-    private Team donor9;
-    private Team donor10;
+public class TablistPrefix extends JavaPlugin implements Listener
+{
+    public Scoreboard sb;
+    public Objective obj;
+    public boolean vault;
+    public Team owner;
+    public Team coowner;
+    public Team hadmin;
+    public Team admin;
+    public Team hmod;
+    public Team mod;
+    public Team helper;
+    public Team builder;
+    public Team developer;
+    public Team def;
+    public Team donor1;
+    public Team donor2;
+    public Team donor3;
+    public Team donor4;
+    public Team donor5;
+    public Team donor6;
+    public Team donor7;
+    public Team donor8;
+    public Team donor9;
+    public Team donor10;
 
+    public Permission permission = null;
+    public Chat chat = null;
 
-    private Permission permission = null;
-    private Chat chat = null;
+    public Teams teams = null;
+    public Prefix prefix = null;
+    public Vault vth = null;
 
-    public void onEnable() {
+    public void onEnable()
+    {
 
-        getConfig().options().copyDefaults(true);
-        saveDefaultConfig();
-        getServer().getPluginManager().registerEvents(this, this);
+	getConfig().options().copyDefaults(true);
+	saveDefaultConfig();
+	getServer().getPluginManager().registerEvents(this, this);
 
-        //Register scoreboard and objective.
+	//Register scoreboard and objective.
 
-        sb = Bukkit.getScoreboardManager().getNewScoreboard();
-        obj = sb.registerNewObjective("dummy", "begin");
+	sb = Bukkit.getScoreboardManager().getNewScoreboard();
+	obj = sb.registerNewObjective("dummy", "begin");
 
-        //Hook into vault if enabled
-        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-            getLogger().log(Level.INFO, "Vault found!.");
-            vault = true;
-            setupPermissions();
-            setupChat();
-        } else {
-            getLogger().log(Level.INFO, "Vault not found.");
-            vault = false;
-        }
+	//Hook into vault if enabled
+	if (getServer().getPluginManager().isPluginEnabled("Vault"))
+	{
+	    getLogger().log(Level.INFO, "Vault found!.");
+	    vault = true;
+	    vth = new Vault(this);
+	    if(vth != null){
+		vth.setupPermissions();
+		vth.setupChat();
+	    }
+	}
+	else
+	{
+	    getLogger().log(Level.INFO, "Vault not found.");
+	    vault = false;
+	}
 
-        getCommand("tabprefix").setExecutor(new Command(this));
+	//Register OnJoinEvent
+        getServer().getPluginManager().registerEvents(new OnJoin(this), this);
+	//Register Command
+	getCommand("tabprefix").setExecutor(new Command(this));
+	//Set teames = Teams and if its not null then register them and set prefixes/suffixes
+	teams = new Teams(this);
+	if (teams != null)
+	{
+	    teams.registerTeams();
+	    teams.setPrefixesAndSuffixes();
 
-        registerTeams();
-        setPrefixesAndSuffixes();
+	}
 
-        //Start the task to refresh the prefixes every 300 seconds
-        Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!vault) {
-                    refreshPrefix();
-                }
-            }
-        }, 0, 300 * 20);
+	//Set prefix = Prefix
+	prefix = new Prefix(this);
+
+	//Start the task to refresh the prefixes every 300 seconds
+	Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new BukkitRunnable()
+	{
+	    @Override public void run()
+	    {
+		    prefix.refreshPrefix();
+	    }
+	}, 0, 300 * 20);
     }
 
-    public void onDisable() {
-        saveDefaultConfig();
-        Bukkit.getScheduler().cancelAllTasks();
-    }
-    public boolean setupPermissions() {
-        RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
-        if (permissionProvider != null) {
-            permission = permissionProvider.getProvider();
-        }
-        return (permission != null);
+    public void onDisable()
+    {
+	saveDefaultConfig();
+	Bukkit.getScheduler().cancelAllTasks();
     }
 
-    public boolean setupChat() {
-        RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
-        if (chatProvider != null) {
-            chat = chatProvider.getProvider();
-        }
-        return (chat != null);
-    }
-    public void registerTeams() {
-        //Register team if not already registered
-        owner = sb.getTeam("OWNER") == null ? sb.registerNewTeam("OWNER") : sb.getTeam("OWNER");
-        coowner = sb.getTeam("COOWNER") == null ? sb.registerNewTeam("COOWNER") : sb.getTeam("COOWNER");
-        hadmin = sb.getTeam("HADMIN") == null ? sb.registerNewTeam("HADMIN") : sb.getTeam("HADMIN");
-        admin = sb.getTeam("ADMIN") == null ? sb.registerNewTeam("ADMIN") : sb.getTeam("ADMIN");
-        hmod = sb.getTeam("HMOD") == null ? sb.registerNewTeam("HMOD") : sb.getTeam("HMOD");
-        mod = sb.getTeam("MOD") == null ? sb.registerNewTeam("MOD") : sb.getTeam("MOD");
-        helper = sb.getTeam("HELPER") == null ? sb.registerNewTeam("HELPER") : sb.getTeam("HELPER");
-        builder = sb.getTeam("BUILDER") == null ? sb.registerNewTeam("BUILDER") : sb.getTeam("BUILDER");
-        developer = sb.getTeam("DEVELOPER") == null ? sb.registerNewTeam("DEVELOPER") : sb.getTeam("DEVELOPER");
-        def = sb.getTeam("DEFAULT") == null ? sb.registerNewTeam("DEFAULT") : sb.getTeam("DEFAULT");
-        donor1 = sb.getTeam("DONOR1") == null ? sb.registerNewTeam("DONOR1") : sb.getTeam("DONOR1");
-        donor2 = sb.getTeam("DONOR2") == null ? sb.registerNewTeam("DONOR2") : sb.getTeam("DONOR2");
-        donor3 = sb.getTeam("DONOR3") == null ? sb.registerNewTeam("DONOR3") : sb.getTeam("DONOR3");
-        donor4 = sb.getTeam("DONOR4") == null ? sb.registerNewTeam("DONOR4") : sb.getTeam("DONOR4");
-        donor5 = sb.getTeam("DONOR5") == null ? sb.registerNewTeam("DONOR5") : sb.getTeam("DONOR5");
-        donor6 = sb.getTeam("DONOR6") == null ? sb.registerNewTeam("DONOR6") : sb.getTeam("DONOR6");
-        donor7 = sb.getTeam("DONOR7") == null ? sb.registerNewTeam("DONOR7") : sb.getTeam("DONOR7");
-        donor8 = sb.getTeam("DONOR8") == null ? sb.registerNewTeam("DONOR8") : sb.getTeam("DONOR8");
-        donor9 = sb.getTeam("DONOR9") == null ? sb.registerNewTeam("DONOR9") : sb.getTeam("DONOR9");
-        donor10 = sb.getTeam("DONOR10") == null ? sb.registerNewTeam("DONOR10") : sb.getTeam("DONOR10");
-
-        getLogger().log(Level.INFO, "Teams Registered.");
-    }
-
-    public void setPrefixesAndSuffixes() {
-        //Grab the prefixes from the config and set them.
-        owner.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Owner")));
-        coowner.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("CoOwner")));
-        hadmin.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("HeadAdmin")));
-        admin.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Admin")));
-        hmod.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("HeadMod")));
-        mod.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Mod")));
-        helper.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Helper")));
-        builder.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Builder")));
-        developer.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Developer")));
-        def.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Default")));
-        donor1.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor1")));
-        donor2.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor2")));
-        donor3.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor3")));
-        donor4.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor4")));
-        donor5.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor5")));
-        donor6.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor6")));
-        donor7.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor7")));
-        donor8.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor8")));
-        donor9.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor9")));
-        donor10.setPrefix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor10")));
-
-        //Same as above but for suffixes
-        if (getConfig().getBoolean("Use-Suffixes")) {
-            owner.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Owner-Suffix")));
-            coowner.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("CoOwner-Suffix")));
-            hadmin.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("HeadAdmin-Suffix")));
-            admin.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Admin-Suffix")));
-            hmod.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("HeadMod-Suffix")));
-            mod.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Mod-Suffix")));
-            helper.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Helper-Suffix")));
-            builder.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Builder-Suffix")));
-            developer.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Developer-Suffix")));
-            def.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Default-Suffix")));
-            donor1.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor1-Suffix")));
-            donor2.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor2-Suffix")));
-            donor3.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor3-Suffix")));
-            donor4.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor4-Suffix")));
-            donor5.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor5-Suffix")));
-            donor6.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor6-Suffix")));
-            donor7.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor7-Suffix")));
-            donor8.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor8-Suffix")));
-            donor9.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor9-Suffix")));
-            donor10.setSuffix(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Donor10-Suffix")));
-
-        }
-
-
-        getLogger().log(Level.INFO, "Prefixes & Suffixes Set.");
-    }
-
-    @EventHandler
-    public void onJoin(PlayerJoinEvent e) {
-        refreshPrefix();
-        e.getPlayer().setScoreboard(sb);
-    }
-
-    public void refreshPrefix() {
-        //Loop through all online players and set them to the right group
-
-        if (vault && getConfig().getBoolean("GetPermPrefixes")) {
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                permPrefixes(p);
-            }
-        } else {
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.hasPermission("rank.owner")) {
-                    owner.addPlayer(p);
-                } else if (p.hasPermission("rank.coowner")) {
-                    coowner.addPlayer(p);
-                } else if (p.hasPermission("rank.hadmin")) {
-                    hadmin.addPlayer(p);
-                } else if (p.hasPermission("rank.admin")) {
-                    admin.addPlayer(p);
-                } else if (p.hasPermission("rank.hmod")) {
-                    hmod.addPlayer(p);
-                } else if (p.hasPermission("rank.mod")) {
-                    mod.addPlayer(p);
-                } else if (p.hasPermission("rank.helper")) {
-                    helper.addPlayer(p);
-                } else if (p.hasPermission("rank.builder")) {
-                    builder.addPlayer(p);
-                } else if (p.hasPermission("rank.developer")) {
-                    developer.addPlayer(p);
-                } else if (p.hasPermission("rank.donor1")) {
-                    donor1.addPlayer(p);
-                } else if (p.hasPermission("rank.donor2")) {
-                    donor2.addPlayer(p);
-                } else if (p.hasPermission("rank.donor3")) {
-                    donor3.addPlayer(p);
-                } else if (p.hasPermission("rank.donor4")) {
-                    donor4.addPlayer(p);
-                } else if (p.hasPermission("rank.donor5")) {
-                    donor5.addPlayer(p);
-                } else if (p.hasPermission("rank.donor6")) {
-                    donor6.addPlayer(p);
-                } else if (p.hasPermission("rank.donor7")) {
-                    donor7.addPlayer(p);
-                } else if (p.hasPermission("rank.donor8")) {
-                    donor8.addPlayer(p);
-                } else if (p.hasPermission("rank.donor9")) {
-                    donor9.addPlayer(p);
-                } else if (p.hasPermission("rank.donor10")) {
-                    donor10.addPlayer(p);
-                } else {
-                    def.addPlayer(p);
-                }
-            }
-        }
-    }
-
-    public void permPrefixes(Player p) {
-        Team playerPrefix = sb.getTeam(p.getName()) == null ? sb.registerNewTeam(p.getName()) : sb.getTeam(p.getName());
-        if (chat.getPlayerPrefix(p).length() <= 16) {
-            if (getConfig().getBoolean("ReplaceBrackets")) {
-                String prefix = chat.getPlayerPrefix(p);
-                String prefix1 = prefix.replace("<", "").replace(">", "");
-                String prefix2 = prefix1.replace("[", "").replace("]", "");
-                String prefix3 = prefix2.replace("(", "").replace(")", "");
-                String prefix4 = prefix3.replace("{", "").replace("}", "");
-                String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix4);
-                playerPrefix.setPrefix(finalPrefix);
-                if (getConfig().getBoolean("Use-Suffixes")) {
-                    if (chat.getPlayerSuffix(p).length() <= 16) {
-                        String suffix = chat.getPlayerSuffix(p);
-                        String suffix1 = suffix.replace("<", "").replace(">", "");
-                        String suffix2 = suffix1.replace("[", "").replace("]", "");
-                        String suffix3 = suffix2.replace("(", "").replace(")", "");
-                        String suffix4 = suffix3.replace("{", "").replace("}", "");
-                        String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix4);
-                        playerPrefix.setSuffix(finalSuffix);
-                    }
-                }
-                playerPrefix.addPlayer(p);
-            } else {
-                String prefix = chat.getPlayerPrefix(p);
-                String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix);
-                playerPrefix.setPrefix(finalPrefix);
-                if (getConfig().getBoolean("Use-Suffixes")) {
-                    if (chat.getPlayerSuffix(p).length() <= 16) {
-                        String suffix = chat.getPlayerSuffix(p);
-                        String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix);
-                        playerPrefix.setSuffix(finalSuffix);
-                    }
-                }
-                playerPrefix.addPlayer(p);
-            }
-        } else {
-            if (getConfig().getBoolean("ReplaceBrackets")) {
-                String prefix = chat.getPlayerPrefix(p);
-                String prefix1 = prefix.replace("<", "").replace(">", "");
-                String prefix2 = prefix1.replace("[", "").replace("]", "");
-                String prefix3 = prefix2.replace("(", "").replace(")", "");
-                String prefix4 = prefix3.replace("{", "").replace("}", "");
-                String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix4);
-                if (finalPrefix.length() <= 16) {
-                    playerPrefix.setPrefix(finalPrefix);
-                }
-                if (getConfig().getBoolean("Use-Suffixes")) {
-
-                    String suffix = chat.getPlayerSuffix(p);
-                    String suffix1 = suffix.replace("<", "").replace(">", "");
-                    String suffix2 = suffix1.replace("[", "").replace("]", "");
-                    String suffix3 = suffix2.replace("(", "").replace(")", "");
-                    String suffix4 = suffix3.replace("{", "").replace("}", "");
-                    String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix4);
-                    if (chat.getPlayerSuffix(p).length() <= 16) {
-                        playerPrefix.setSuffix(finalSuffix);
-                    }
-                }
-                playerPrefix.addPlayer(p);
-            } else {
-                Bukkit.getConsoleSender().sendMessage("[Tab Prefix] Looks like your defined prefixes aren't 16 characters or less!");
-            }
-        }
-    }
 }
