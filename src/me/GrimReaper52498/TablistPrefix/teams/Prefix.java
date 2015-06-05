@@ -123,97 +123,28 @@ public class Prefix
     public void permPrefixes(Player p)
     {
 	Team playerPrefix = pl.sb.getTeam(p.getName()) == null ? pl.sb.registerNewTeam(p.getName()) : pl.sb.getTeam(p.getName());
-	if (pl.chat.getPlayerPrefix(p).length() <= 16)
-	{
-	    if (pl.getConfig().getBoolean("ReplaceBrackets"))
-	    {
-		String prefix = pl.chat.getPlayerPrefix(p);
-		String finalPrefix = ChatColor.translateAlternateColorCodes('&', replaceBrackets(prefix));
-		playerPrefix.setPrefix(finalPrefix);
-		if (pl.getConfig().getBoolean("Use-Suffixes"))
-		{
-		    if (pl.chat.getPlayerSuffix(p).length() <= 16)
-		    {
-			String suffix = pl.chat.getPlayerSuffix(p);
-			String finalSuffix = ChatColor.translateAlternateColorCodes('&', replaceBrackets(suffix));
-			playerPrefix.setSuffix(finalSuffix);
-		    }
-		    else
-		    {
-			String suffix = pl.chat.getPlayerSuffix(p);
-			String finalSuffix = ChatColor.translateAlternateColorCodes('&', cutString(replaceBrackets(suffix)));
-			playerPrefix.setSuffix(finalSuffix);
-		    }
-		}
-		playerPrefix.addPlayer(p);
-	    }
-	    else
-	    {
-		String prefix = pl.chat.getPlayerPrefix(p);
-		String finalPrefix = ChatColor.translateAlternateColorCodes('&', prefix);
-		if (finalPrefix.length() > 16)
-		{
-		    playerPrefix.setPrefix(finalPrefix);
-		}
-		else
-		{
-		    playerPrefix.setPrefix(cutString(finalPrefix));
-		}
 
-		if (pl.getConfig().getBoolean("Use-Suffixes"))
-		{
-		    if (pl.chat.getPlayerSuffix(p).length() <= 16)
-		    {
-			String suffix = pl.chat.getPlayerSuffix(p);
-			String finalSuffix = ChatColor.translateAlternateColorCodes('&', suffix);
-			playerPrefix.setSuffix(finalSuffix);
-		    }
-		    else
-		    {
-			String suffix = pl.chat.getPlayerSuffix(p);
-			String finalSuffix = ChatColor.translateAlternateColorCodes('&', cutString(suffix));
-			playerPrefix.setSuffix(finalSuffix);
-		    }
-		}
-		playerPrefix.addPlayer(p);
+	if (pl.getConfig().getBoolean("ReplaceBrackets"))
+	{
+	    setReplacedVaultPrefix(playerPrefix, p);
+	    if (pl.getConfig().getBoolean("Use-Suffixes"))
+	    {
+		setReplacedVaultSuffix(playerPrefix, p);
 	    }
+	    playerPrefix.addPlayer(p);
 	}
 	else
 	{
-	    if (pl.getConfig().getBoolean("ReplaceBrackets"))
+	    setVaultPrefix(playerPrefix, p);
+	    if (pl.getConfig().getBoolean("Use-Suffixes"))
 	    {
-		String prefix = pl.chat.getPlayerPrefix(p);
-		String finalPrefix = ChatColor.translateAlternateColorCodes('&', replaceBrackets(prefix));
-		if (finalPrefix.length() <= 16)
-		{
-		    playerPrefix.setPrefix(finalPrefix);
-		}
-		else
-		{
-		    playerPrefix.setPrefix(cutString(finalPrefix));
-		}
-		if (pl.getConfig().getBoolean("Use-Suffixes"))
-		{
-
-		    String suffix = pl.chat.getPlayerSuffix(p);
-		    String finalSuffix = ChatColor.translateAlternateColorCodes('&', replaceBrackets(suffix));
-		    if (pl.chat.getPlayerSuffix(p).length() <= 16)
-		    {
-			playerPrefix.setSuffix(finalSuffix);
-		    }
-		    else
-		    {
-			playerPrefix.setSuffix(cutString(finalSuffix));
-		    }
-		}
-		playerPrefix.addPlayer(p);
+		setVaultSuffix(playerPrefix, p);
 	    }
-	    else
-	    {
-		Bukkit.getConsoleSender().sendMessage("[TabPrefix] Looks like your defined prefixes aren't 16 characters or less!");
-	    }
+	    playerPrefix.addPlayer(p);
 	}
     }
+
+
 
     public String replaceBrackets(String toReplace)
     {
@@ -260,6 +191,54 @@ public class Prefix
 	    string = string.substring(0, 15);
 	}
 	return string;
+    }
+
+    public void setVaultPrefix(Team team, Player p)
+    {
+	String prefix = pl.chat.getPlayerPrefix(p);
+	String toSet = prefix;
+	if (prefix.length() > 16)
+	{
+	    toSet = cutString(prefix);
+	}
+	toSet = ChatColor.translateAlternateColorCodes('&', toSet);
+	team.setPrefix(toSet);
+    }
+
+    public void setVaultSuffix(Team team, Player p)
+    {
+	String suffix = pl.chat.getPlayerSuffix(p);
+	String toSet = suffix;
+	if (suffix.length() > 16)
+	{
+	    toSet = cutString(suffix);
+	}
+	toSet = ChatColor.translateAlternateColorCodes('&', toSet);
+	team.setSuffix(toSet);
+    }
+
+    public void setReplacedVaultPrefix(Team team, Player p)
+    {
+	String prefix = pl.chat.getPlayerPrefix(p);
+	String toSet = replaceBrackets(prefix);
+	if (prefix.length() > 16)
+	{
+	    toSet = cutString(replaceBrackets(prefix));
+	}
+	toSet = ChatColor.translateAlternateColorCodes('&', toSet);
+	team.setPrefix(toSet);
+    }
+
+    public void setReplacedVaultSuffix(Team team, Player p)
+    {
+	String suffix = pl.chat.getPlayerSuffix(p);
+	String toSet = replaceBrackets(suffix);
+	if (suffix.length() > 16)
+	{
+	    toSet = cutString(replaceBrackets(suffix));
+	}
+	toSet = ChatColor.translateAlternateColorCodes('&', toSet);
+	team.setSuffix(toSet);
     }
 
 }

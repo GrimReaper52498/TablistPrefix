@@ -1,6 +1,6 @@
 name: TablistPrefix
 main: me.GrimReaper52498.TablistPrefix.TablistPrefix
-version: 1.4.0
+version: 1.4.1
 description: Ranks in tablist, Request by SkilledKevin25
 commands:
      tabprefix:
