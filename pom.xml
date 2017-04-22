@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.grimreaper52498</groupId>
+    <artifactId>TablistPrefix</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+
+    <repositories>
+        <repository>
+        <id>spigot-repo</id>
+        <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+        </repository>
+
+
+        <repository>
+            <id>vault-repo</id>
+            <url>http://nexus.hc.to/content/repositories/pub_releases</url>
+        </repository>
+
+    </repositories>
+
+
+    <dependencies>
+        <!--<dependency>-->
+        <!--<groupId>org.spigotmc</groupId>-->
+        <!--<artifactId>spigot</artifactId>-->
+        <!--<version>1.9.2-R0.1-SNAPSHOT</version>-->
+        <!--<scope>provided</scope>-->
+        <!--</dependency>-->
+
+        <dependency>
+        <groupId>org.spigotmc</groupId>
+        <artifactId>spigot-api</artifactId>
+        <version>1.11.2-R0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.milkbowl.vault</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.6</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <finalName>UHCSim</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>plugin.yml</include>
+                            <include>config.yml</include>
+                        </includes>
+                    </artifactSet>
+
+                    <!--<relocations>-->
+                    <!--<relocation>-->
+                    <!--<pattern>com.zaxxer</pattern>-->
+                    <!--<shadedPattern>com.grimreaper52498.uhcsim</shadedPattern>-->
+                    <!--</relocation>-->
+
+                    <!--<relocation>-->
+                    <!--<pattern>org.slf4j</pattern>-->
+                    <!--<shadedPattern>com.grimreaper52498.uhcsim.slf4j</shadedPattern>-->
+                    <!--</relocation>-->
+
+                    <!--<relocation>-->
+                    <!--<pattern>javassist</pattern>-->
+                    <!--<shadedPattern>com.grimreaper52498.uhcsim.javassist</shadedPattern>-->
+                    <!--</relocation>-->
+                    <!--</relocations>-->
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>com.github.wvengen</groupId>-->
+            <!--<artifactId>proguard-maven-plugin</artifactId>-->
+            <!--<version>2.0.6</version>-->
+            <!--<dependencies>-->
+            <!--<dependency>-->
+            <!--<groupId>net.sf.proguard</groupId>-->
+            <!--<artifactId>proguard-base</artifactId>-->
+            <!--<version>4.10</version>-->
+            <!--</dependency>-->
+            <!--</dependencies>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>package</phase>-->
+            <!--<goals><goal>proguard</goal></goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--<configuration>-->
+            <!--<proguardVersion>4.10</proguardVersion>-->
+            <!--<obfuscate>true</obfuscate>-->
+            <!--<injar>${project.build.finalName}.jar</injar>-->
+            <!--<outjar>${project.build.finalName}-obfuscated.jar</outjar>-->
+            <!--<options>-->
+            <!--<option>-keep public class * extends org.bukkit.plugin.java.JavaPlugin</option>-->
+            <!--<option>-keep class com.grimreaper52498.punish.hikari.** { *; }</option>-->
+            <!--<option>-keep class com.grimreaper52498.punish.slf4j.** { *; }</option>-->
+            <!--<option>-keep class com.grimreaper52498.punish.javassist.** { *; }</option>-->
+            <!--<option>-keep public enum com.grimreaper52498.punish.core.events.InventoryEvents$** {-->
+            <!--**[] $VALUES;-->
+            <!--public *;-->
+            <!--}</option>-->
+            <!--<option>-keepnames class com.grimreaper52498.punish.core.player.PunishPlayer {public *;}</option>-->
+            <!--<option>-dontshrink</option>-->
+            <!--<option>-dontoptimize</option>-->
+            <!--<option>-ignorewarnings</option>-->
+            <!--<option>-keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,Synthetic,EnclosingMethod</option>-->
+            <!--</options>-->
+            <!--<libs>-->
+            <!--<lib>${java.home}/lib/rt.jar</lib>-->
+            <!--<lib>${java.home}/lib/jce.jar</lib>-->
+            <!--</libs>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
